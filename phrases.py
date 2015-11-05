@@ -10,18 +10,18 @@ END = [-1]
 
 class GramNode(object):
     def __init__(self, parent):
-        self.sentences = []
+        self.occurrences = 0
         self.parent = parent
         self.children = defaultdict(self.make_child)
 
     def make_child(self):
         return GramNode(self)
 
-    def add_sentence(self, sentence):
-        self.sentences.append(sentence)
+    def add_occurrence(self):
+        self.occurrences += 1
 
     def count(self):
-        return sum(map(lambda x: x.count(), self.children.values())) + len(self.sentences)
+        return sum(map(lambda x: x.count(), self.children.values())) + self.occurrences
 
     def get(self, keys):
         if len(keys) == 0:
@@ -82,7 +82,7 @@ class Corpus(object):
 
         grams = nltk.ngrams(tokens, 3)
         for g in grams:
-            self.counts.get(g).add_sentence(tokens)
+            self.counts.get(g).add_occurrence()
 
     def add_prefixes(self, prefixes):
         for p in prefixes:
