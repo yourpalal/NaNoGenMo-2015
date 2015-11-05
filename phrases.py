@@ -53,9 +53,20 @@ class GramNode(object):
         # print("{} | {} -> {}".format(oldKeys, keys, result[0]))
         return result
 
+    def merge_into(self, other, weight=1.0):
+        other.occurrences += self.occurrences * weight
+        for key in self.children:
+            self.children[key].merge_into(other.children[key], weight)
+
+    def traverse(self, f):
+        for child in self.children.values():
+            child.traverse(f)
+        f(self)
+
 
 PRE_PUNCT_SPACE_MATCHER = re.compile(r"\s+([.,:)}'?!]+)")
 POST_PUNCT_SPACE_MATCHER = re.compile(r"([\({])\s+")
+
 
 class Corpus(object):
     def __init__(self):
@@ -104,6 +115,38 @@ class Corpus(object):
             words.append(token)
         return self.detokenize_sentence(words[2:-1])
 
+    def word_set(self, node=None):
+        node = node or self.counts
+        all_words = set(node.children.keys()) - {BEGIN[0], END[0]} # strings only
+
+        for child in node.children.values():
+            all_words.update(self.word_set(child))
+        return all_words
+
+    def fix_casing(self):
+        all_words = self.word_set()
+
+        # if a word only shows up title cased, it is probably a name eg. Socrates
+        no_lower = {w.lower() for w in all_words} - {w for w in all_words if w.islower()}
+        self.to_lower(self.counts, no_lower)
+
+        # make all sentences start with caps
+        beginnings = self.counts.get(BEGIN)
+        beginnings.children = {token.title(): child for (token, child) in beginnings.children.items()}
+
+    def to_lower(self, node, exempt):
+        for child in node.children.values():
+            self.to_lower(child, exempt)
+
+        # make a list so that we don't get tripped up while deleting/adding keys
+        for key in list(node.children.keys()):
+            lower = key.lower() if hasattr(key, 'lower') else key
+            if lower in exempt or lower == key:
+                continue
+
+            node.children[key].merge_into(node.children[lower])
+            del node.children[key]
+
 
 if __name__ == '__main__':
     corpus = Corpus()
@@ -132,6 +175,8 @@ if __name__ == '__main__':
     corpus.counts.delete("\\\\")
     corpus.counts.delete("\\")
     corpus.counts.delete("\\1")
+
+    corpus.fix_casing()
 
     for i in range(5):
         print("{}: {}".format(i, corpus.generate_sentence()))
