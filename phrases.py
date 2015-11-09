@@ -137,6 +137,7 @@ class Corpus(object):
     @staticmethod
     def detokenize_sentence(sentence):
         result = " ".join(sentence)
+        result = result[0].upper() + result[1:]
         result = PRE_PUNCT_SPACE_MATCHER.sub(r"\1", result)
         return POST_PUNCT_SPACE_MATCHER.sub(r"\1", result)
 
@@ -200,10 +201,6 @@ class Corpus(object):
         # if a word only shows up title cased, it is probably a name eg. Socrates
         no_lower = {w.lower() for w in all_words} - {w for w in all_words if w.islower()}
         self.to_lower(self.counts, no_lower)
-
-        # make all sentences start with caps
-        beginnings = self.counts.get(BEGIN)
-        beginnings.children = {token.title(): child for (token, child) in beginnings.children.items()}
 
     def to_lower(self, node, exempt):
         for child in node.children.values():
