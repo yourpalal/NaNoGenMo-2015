@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from collections import defaultdict
-import fileinput, itertools, nltk, random, re
+import fileinput, itertools, math, nltk, random, re
 
 sentence_splitter = nltk.data.load('tokenizers/punkt/english.pickle')
 
@@ -51,14 +51,17 @@ class GramNode(object):
         return random.choice(self.children.items() or [(END[0], None)])
 
     def has(self, keys):
-        return len(keys) == 0 or (keys[0] in self.children and self.children[keys[0]].has(keys[1:]))
+        if len(keys) == 0:
+            return False
+        elif len(keys) == 1:
+            return keys[0] in self.children
+        return keys[0] in self.children and self.children[keys[0]].has(keys[1:])
 
     def pick_best(self, keys, phrase_type):
         oldKeys = keys
         while (not self.has(keys)) and len(keys) > 0:
             keys = keys[1:]
         result = self.get(keys).pick(phrase_type)
-        # print("{} | {} -> {}".format(oldKeys, keys, result[0]))
         return result
 
     def merge_into(self, other, weight=1.0):
@@ -71,6 +74,13 @@ class GramNode(object):
         for child in self.children.values():
             child.traverse(f)
         f(self)
+
+    def show(self, spaces):
+        for token, node in self.children.items():
+            print("{}-> {}".format(spaces, token))
+            node.show(spaces + "-")
+
+
 
 ABBREV_MATCHERS = (
     re.compile(r"et al ?\.\s*$"), # match et al .
@@ -127,8 +137,9 @@ POST_PUNCT_SPACE_MATCHER = re.compile(r"([\({])\s+")
 
 
 class Corpus(object):
-    def __init__(self):
+    def __init__(self, gram_length=5):
         self.counts = GramNode(None)
+        self.gram_length = gram_length
 
     @staticmethod
     def tokenize_sentence(sentence):
@@ -163,8 +174,11 @@ class Corpus(object):
             tokens = self.tokenize_sentence(tokens)
         phrase_type = phrase_type or self.deduce_phrase_type(tokens)
 
-        grams = nltk.ngrams(tokens, 3)
+        grams = list(nltk.ngrams(tokens, self.gram_length, pad_right=True, pad_symbol=END[0]))
         for g in grams:
+            if END[0] in g:
+                g = g[:g.index(END[0]) + 1]
+                # we don't need all that padding!
             self.counts.get(g).add_occurrence(phrase_type)
 
     def add_prefixes(self, prefixes, phrase_type):
@@ -183,7 +197,9 @@ class Corpus(object):
     def generate_sentence(self, phrase_type):
         words = BEGIN + BEGIN
         while words[-1] != END[0]:
-            token, node = self.pick_next_token(words[-2:], phrase_type)
+            # choose number of previous tokens to consider, trending towards more as our sentence grows
+            context = self.gram_length - 1 - math.floor(random.random() ** math.log(len(words)) * (self.gram_length - 1))
+            token, node = self.pick_next_token(words[-context:], phrase_type)
             words.append(token)
         return self.detokenize_sentence(words[2:-1])
 
@@ -215,6 +231,9 @@ class Corpus(object):
             node.children[key].merge_into(node.children[lower])
             del node.children[key]
 
+    def show(self):
+        self.counts.show("")
+
 
 if __name__ == '__main__':
     corpus = Corpus()
@@ -242,6 +261,8 @@ if __name__ == '__main__':
         " EUREKA!",
     ], DECLARATION)
 
+    corpus.add_sentence("wow can you believe it?")
+
 
     for l in fileinput.input():
         corpus.add_document(l)
@@ -252,6 +273,7 @@ if __name__ == '__main__':
     corpus.counts.delete("\\1")
 
     corpus.fix_casing()
+
 
     for i in range(6):
         print("{}: {}".format(i, corpus.generate_sentence(i % 3)))
