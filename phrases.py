@@ -184,6 +184,10 @@ class Corpus(object):
                 # we don't need the padding!
             self.counts.get(g).add_occurrence(phrase_type)
 
+    def add_sentences(self, sentences, phrase_type=None):
+        for s in sentences:
+            self.add_sentence(s, phrase_type)
+
     def add_prefixes(self, prefixes, phrase_type):
         for p in prefixes:
             tokens = self.tokenize_sentence(p)[:-1] # remove END token
@@ -242,29 +246,53 @@ if __name__ == '__main__':
     corpus = Corpus()
 
     corpus.add_prefixes([
-        "How does",
-    ], QUESTION)
-    corpus.add_prefixes([
-        "I get the feeling that you don't understand the concept at hand.",
         "You do not understand,",
         "I do not understand,",
         "It is understood,",
-        "I understand,",
+        "As I understand it,",
         "Of course,",
         "Agreed,"
     ], DECLARATION)
-    corpus.add_suffixes([
-        ", is that right?",
-        ", or is it?",
-        "or maybe not?",
-    ], QUESTION)
+    corpus.add_sentences([
+        "I get the feeling that you do not understand the concept at hand.",
+    ], DECLARATION)
     corpus.add_suffixes([
         ", but then I'm lost",
         ", if I understand correctly",
         " EUREKA!",
     ], DECLARATION)
 
-    corpus.add_sentence("wow can you believe it?")
+    corpus.add_sentences([
+        "This is not correct.",
+        "I disagree.",
+        "You must reconsider my earlier point.",
+        "This is precisely the problem",
+    ], FACT)
+
+    corpus.add_prefixes([
+        "How does",
+        "Could it be said",
+        "Could it be said that",
+        "Is it not the case",
+        "Is it not the case that",
+        "I wonder if",
+        "Have you considered"
+    ], QUESTION)
+    corpus.add_sentences([
+        "can you believe it?"
+    ], QUESTION)
+    corpus.add_suffixes([
+        "case at hand?",
+        "case in question?",
+        "that is true?",
+        "that is false?",
+        "that is consistent?",
+        "that is inconsistent?",
+        ", is that right?",
+        ", or is it?",
+        "or maybe not?",
+    ], QUESTION)
+
 
 
     for l in fileinput.input():
