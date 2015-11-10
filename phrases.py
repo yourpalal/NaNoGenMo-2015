@@ -28,8 +28,10 @@ class GramNode(object):
     def add_occurrence(self, phrase_type):
         self.occurrences[phrase_type] += 1
 
-    def count(self, phrase_type):
-        return sum(map(lambda x: x.count(phrase_type), self.children.values())) + self.occurrences[phrase_type]
+    def likelihood(self, phrase_type):
+        # take log of occurrences + 1 so that 0 occurences = 0, and very common phrases
+        # do not completely dominate our phrases
+        return sum(map(lambda x: x.likelihood(phrase_type), self.children.values())) + math.log(self.occurrences[phrase_type] + 1)
 
     def get(self, keys):
         if len(keys) == 0:
@@ -43,9 +45,9 @@ class GramNode(object):
             child.delete(key)
 
     def pick(self, phrase_type):
-        skip = random.random() * self.count(phrase_type)
+        skip = random.random() * self.likelihood(phrase_type)
         for token in self.children:
-            skip -= self.children[token].count(phrase_type)
+            skip -= self.children[token].likelihood(phrase_type)
             if skip <= 0:
                 return token, self.children[token]
         return random.choice(self.children.items() or [(END[0], None)])
