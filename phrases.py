@@ -7,6 +7,7 @@ sentence_splitter = nltk.data.load('tokenizers/punkt/english.pickle')
 
 BEGIN = [0]
 END = [-1]
+CITATION = [2]
 
 # basically an enum of phrase types. Some may be mutually exclusive, some may not.
 QUESTION = 0
@@ -14,6 +15,12 @@ DECLARATION = 1
 FACT = 2
 
 FACT_WORDS = set(["hence", "therefore", "is", "can", "cannot", "must", "should"])
+
+def lower(token):
+    return token.lower() if hasattr(token, 'lower') else token
+
+def islower(token):
+    return token.islower() if hasattr(token, 'islower') else True
 
 
 class GramNode(object):
@@ -135,6 +142,37 @@ def paren_matching_fixer(phrases):
         count = 0
         yield p
 
+
+def detect_citations(phrase, start_at=0):
+    try:
+        paren_start = phrase.index("(", start_at)
+        paren_end = phrase.index(")", paren_start)
+    except:
+        return [] # no ( or )
+
+    # too long to be a citation
+    if paren_end - paren_start > 10:
+        return detect_citations(paren_end)
+
+    try:
+        yearOrPage = int(phrase[paren_end - 1])
+        return detect_citations(phrase, paren_end) + [(paren_start, paren_end)]
+    except:
+        return detect_citations(phrase, paren_end)
+
+
+def remove_citations(tokens):
+    """Attempts to replace citations like (Ralph 2015) with the CITATION special
+    token, to be replaced with another citation later."""
+
+    if "(" in tokens and ")" in tokens:
+        citations = detect_citations(tokens)
+        for citation in detect_citations(tokens):
+            tokens = tokens[0:citation[0]] + CITATION + tokens[citation[1] + 1:]
+
+    return tokens
+
+
 PRE_PUNCT_SPACE_MATCHER = re.compile(r"\s+([.,:)}'?!]+)")
 POST_PUNCT_SPACE_MATCHER = re.compile(r"([\({])\s+")
 
@@ -159,7 +197,7 @@ class Corpus(object):
     def deduce_phrase_type(tokens):
         if tokens[-2] == "?" or tokens[-1] == "?": # -1 may be END
             return QUESTION
-        if len(tokens) < 10 and FACT_WORDS.intersection(set(map(lambda t: str(t).lower(), tokens))):
+        if len(tokens) < 10 and FACT_WORDS.intersection(set(map(lambda t: lower(t), tokens))):
             return FACT
         return DECLARATION
 
@@ -170,6 +208,7 @@ class Corpus(object):
 
         for s in sentences:
             tokens = self.tokenize_sentence(s)
+            tokens = remove_citations(tokens)
             self.add_sentence(tokens)
 
     def add_sentence(self, tokens, phrase_type=None):
@@ -208,7 +247,14 @@ class Corpus(object):
             context = self.gram_length - 1 - math.floor(random.random() ** math.log(len(words)) * (self.gram_length - 1))
             token, node = self.pick_next_token(words[-context:], phrase_type)
             words.append(token)
+        words = self.replace_citation_special(words)
         return self.detokenize_sentence(words[2:-1])
+
+    def replace_citation_special(self, phrase):
+        while CITATION[0] in phrase:
+            at = phrase.index(CITATION[0])
+            phrase = phrase[0:at] + ["(", "My", "Butt", "2034", ")"] + phrase[at + 1:]
+        return phrase
 
     def word_set(self, node=None):
         node = node or self.counts
@@ -222,7 +268,7 @@ class Corpus(object):
         all_words = self.word_set()
 
         # if a word only shows up title cased, it is probably a name eg. Socrates
-        no_lower = {w.lower() for w in all_words} - {w for w in all_words if w.islower()}
+        no_lower = {lower(w) for w in all_words} - {w for w in all_words if islower(w)}
         self.to_lower(self.counts, no_lower)
 
     def to_lower(self, node, exempt):
@@ -231,11 +277,11 @@ class Corpus(object):
 
         # make a list so that we don't get tripped up while deleting/adding keys
         for key in list(node.children.keys()):
-            lower = key.lower() if hasattr(key, 'lower') else key
-            if lower in exempt or lower == key:
+            low_key = lower(key)
+            if low_key in exempt or low_key == key:
                 continue
 
-            node.children[key].merge_into(node.children[lower])
+            node.children[key].merge_into(node.children[low_key])
             del node.children[key]
 
     def show(self):
