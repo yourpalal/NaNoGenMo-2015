@@ -176,11 +176,11 @@ class Corpus(object):
             tokens = self.tokenize_sentence(tokens)
         phrase_type = phrase_type or self.deduce_phrase_type(tokens)
 
-        grams = list(nltk.ngrams(tokens, self.gram_length, pad_right=True, pad_symbol=END[0]))
+        grams = list(nltk.ngrams(tokens, self.gram_length, pad_right=True, pad_symbol=None))
         for g in grams:
-            if END[0] in g:
-                g = g[:g.index(END[0]) + 1]
-                # we don't need all that padding!
+            if None in g:
+                g = g[:g.index(None)]
+                # we don't need the padding!
             self.counts.get(g).add_occurrence(phrase_type)
 
     def add_prefixes(self, prefixes, phrase_type):
