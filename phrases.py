@@ -4,6 +4,7 @@ from collections import defaultdict
 import fileinput, itertools, math, nltk, random, re
 
 from cleaners import *
+from conversation import *
 
 sentence_splitter = nltk.data.load('tokenizers/punkt/english.pickle')
 
@@ -16,7 +17,7 @@ QUESTION = 0
 DECLARATION = 1
 FACT = 2
 
-FACT_WORDS = set(["hence", "therefore", "is", "can", "cannot", "must", "should"])
+FACT_WORDS = set(["hence", "therefore", "is", "can", "proven", "cannot", "must", "should"])
 
 def lower(token):
     return token.lower() if hasattr(token, 'lower') else token
@@ -117,7 +118,7 @@ class Corpus(object):
     def deduce_phrase_type(tokens):
         if tokens[-2] == "?" or tokens[-1] == "?": # -1 may be END
             return QUESTION
-        if len(tokens) < 10 and FACT_WORDS.intersection(set(map(lambda t: lower(t), tokens))):
+        if len(tokens) < 15 and FACT_WORDS.intersection(set(map(lambda t: lower(t), tokens))):
             return FACT
         return DECLARATION
 
@@ -211,56 +212,7 @@ class Corpus(object):
 
 if __name__ == '__main__':
     corpus = Corpus()
-
-    corpus.add_prefixes([
-        "You do not understand,",
-        "I do not understand,",
-        "It is understood,",
-        "As I understand it,",
-        "Of course,",
-        "Agreed,"
-    ], DECLARATION)
-    corpus.add_sentences([
-        "I get the feeling that you do not understand the concept at hand.",
-    ], DECLARATION)
-    corpus.add_suffixes([
-        ", but then I'm lost",
-        ", if I understand correctly",
-        " EUREKA!",
-    ], DECLARATION)
-
-    corpus.add_sentences([
-        "This is not correct.",
-        "I disagree.",
-        "You must reconsider my earlier point.",
-        "This is precisely the problem",
-    ], FACT)
-
-    corpus.add_prefixes([
-        "How does",
-        "Could it be said",
-        "Could it be said that",
-        "Is it not the case",
-        "Is it not the case that",
-        "I wonder if",
-        "Have you considered"
-    ], QUESTION)
-    corpus.add_sentences([
-        "can you believe it?"
-    ], QUESTION)
-    corpus.add_suffixes([
-        "case at hand?",
-        "case in question?",
-        "that is true?",
-        "that is false?",
-        "that is consistent?",
-        "that is inconsistent?",
-        ", is that right?",
-        ", or is it?",
-        "or maybe not?",
-    ], QUESTION)
-
-
+    add_all_conversation(corpus)
 
     for l in fileinput.input():
         corpus.add_document(l)
