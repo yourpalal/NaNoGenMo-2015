@@ -1,17 +1,53 @@
 import phrases
 
+import itertools
 from nose.tools import *
 
-tokenize = phrases.Corpus.tokenize_sentence
 
-def test_detetct_citations():
-    # BEGIN WOW ( BOB 2890 ) END
-    eq_(phrases.detect_citations(tokenize("wow (Bob 2890)")), [(2,5)])
+def test_simple_phrase():
+    phrase = "Hey it works!"
+    corpus = phrases.Corpus()
+    corpus.add_sentence(phrase, phrases.DECLARATION)
+    eq_(corpus.generate_sentence(phrases.DECLARATION), phrase)
 
-    eq_(phrases.detect_citations(tokenize("wow (Bob 2890) neat (Jen 1800)")), [(7, 10), (2,5)])
+
+def test_multiple_phrases():
+    corpus = phrases.Corpus()
+    corpus.add_sentences([
+        "hey it works",
+        "hey it made two sentences",
+        "hey it works great",
+        "it made something new",
+    ])
+
+    sentences = set(corpus.generate_sentence(phrases.DECLARATION) for i in range(10))
+    print(sentences)
+
+    ok_(len(sentences) >= 2, "should make multiple sentences, made {}".format(len(sentences)))
 
 
-def test_citation_replacer():
-    eq_(phrases.remove_citations(tokenize("wow (Bob 1995)")), [0, "wow", 2, -1])
-    eq_(phrases.remove_citations(tokenize("neat")), [0, "neat", -1])
-    eq_(phrases.remove_citations(tokenize("cool (oi b09b 1938) yay")), [0, "cool", 2, "yay", -1])
+def test_delete():
+    corpus = phrases.Corpus()
+    corpus.add_sentences([
+        "hey it works",
+        "hey it made two sentences",
+        "hey it works great",
+        "it made something new",
+    ])
+
+    corpus.counts.delete("it")
+
+    eq_(corpus.generate_sentence(phrases.DECLARATION), "Hey")
+
+def test_fix_casing():
+    corpus = phrases.Corpus()
+    corpus.add_sentences([
+        "Ringo is a Name",
+        "name is not a Name"
+    ])
+
+    corpus.fix_casing()
+
+    ok_(corpus.counts.has(["Ringo"]))
+    ok_(not corpus.counts.has(["Name"]))
+    ok_(not corpus.counts.has(["is", "a", "Name"]))
