@@ -123,6 +123,7 @@ class Corpus(object):
 
     def add_document(self, doc):
         sentences = sentence_splitter.tokenize(doc)
+        sentences = tab_splitting_fixer(sentences)
         sentences = abbrev_fixer(sentences)
         sentences = paren_matching_fixer(sentences)
 

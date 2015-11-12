@@ -14,3 +14,7 @@ def test_citation_replacer():
     eq_(cleaners.remove_citations(tokenize("wow (Bob 1995)")), [0, "wow", 2, -1])
     eq_(cleaners.remove_citations(tokenize("neat")), [0, "neat", -1])
     eq_(cleaners.remove_citations(tokenize("cool (oi b09b 1938) yay")), [0, "cool", 2, "yay", -1])
+
+def test_tab_splitter():
+    s = list(cleaners.tab_splitting_fixer(["this is one sentence", "this is another\tand so is this."]))
+    eq_(len(s), 3)

@@ -56,6 +56,15 @@ def abbrev_fixer(phrases):
             broken = []
         yield p
 
+def tab_splitting_fixer(phrases):
+    """Splits sentences on tabs"""
+
+    for p in phrases:
+        if "\t" in p:
+            for piece in p.split("\t"):
+                yield piece
+        else:
+            yield p
 
 # these cleaners work on tokenized phrases, altering them in some way
 

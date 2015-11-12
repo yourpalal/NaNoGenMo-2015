@@ -51,3 +51,10 @@ def test_fix_casing():
     ok_(corpus.counts.has(["Ringo"]))
     ok_(not corpus.counts.has(["Name"]))
     ok_(not corpus.counts.has(["is", "a", "Name"]))
+
+def test_splits_sentences_on_tabs():
+    corpus = phrases.Corpus()
+    corpus.add_document("this is a thing\tand this is another thing")
+
+    ok_(corpus.counts.has("this is a".split()))
+    ok_(not corpus.counts.has("thing and this".split()))
