@@ -18,3 +18,6 @@ def test_citation_replacer():
 def test_tab_splitter():
     s = list(cleaners.tab_splitting_fixer(["this is one sentence", "this is another\tand so is this."]))
     eq_(len(s), 3)
+
+    s = list(cleaners.tab_splitting_fixer(["this is one sentence", "this is another    and so is this."]))
+    eq_(len(s), 3)
