@@ -31,12 +31,13 @@ class UniformPicker(object):
 
 
 class Sentiment(object):
-    def __init__(self, mocking = 0, confirming = 0, excitement = 0):
+    def __init__(self, mocking = 0, confirming = 0, excitement = 0, repeating = 0):
         self.mocking = mocking
         self.confirming = confirming
         self.excitement = excitement
+        self.repeating = repeating
 
-    EXCITING_WORDS = ["!", "wow", "incredible", "amazing"]
+    EXCITING_WORDS = ["!", "wow", "incredible", "amazing", "yes"]
 
     @staticmethod
     def for_phrase(phrase):
@@ -55,6 +56,9 @@ class Sentiment(object):
             last_by_actor = Sentiment.previous_phrase(dialog, i, current)
             last_by_actor = last_by_actor or DialoguePhrase("", phrases.FACT, current.actor)
 
+            if Sentiment.is_repeating(dialog, i):
+                current.sentiment.repeating += 1
+
             if Sentiment.is_mimicking(dialog, i):
                 if last_by_actor.sentiment.mocking > 0:
                     current.sentiment.mocking = last_by_actor.sentiment.mocking + 1
@@ -66,13 +70,24 @@ class Sentiment(object):
                     current.sentiment.confirming += 1
 
     @staticmethod
+    def is_repeating(dialog, starting_from):
+        words = dialog[starting_from].phrase
+        actor = dialog[starting_from].actor
+
+        for i in range(starting_from - 1, max(0, starting_from - 9), - 1):
+            if dialog[i].actor == actor and dialog[i].phrase == words:
+                return True
+        return False
+
+    @staticmethod
     def is_mimicking(dialog, starting_from):
         words = dialog[starting_from].phrase
         actor = dialog[starting_from].actor
 
-        for i in range(starting_from, max(0, starting_from - 9), - 1):
+        for i in range(starting_from, max(0, starting_from - 5), - 1):
             if dialog[i].actor != actor and dialog[i].phrase == words:
                 return True
+        return False
 
     @staticmethod
     def previous_phrase(dialog, starting_from, actor):
@@ -84,6 +99,7 @@ class Sentiment(object):
     def dist(self, other):
         return (self.excitement - other.excitement) ** 2 + \
             (self.mocking - other.mocking) ** 2 + \
+            (self.repeating - other.repeating) ** 2 + \
             (self.confirming - other.confirming) ** 2
 
     def pick_direction(self):
@@ -99,12 +115,15 @@ class Sentiment(object):
         return direction
 
 Sentiment.DIRECTIONS = {
-    ' (mocking)': Sentiment(1, 0, 0),
-    ' (mocking loudly)': Sentiment(2, 0, 0),
-    ' (mocking excitedly)': Sentiment(1, 0, 1),
-    ' (agreeing)': Sentiment(0, 1, 0),
-    ' (cheering)': Sentiment(0, 1, 1),
-    '': Sentiment(0, 0, 0)
+    ' (mocking)': Sentiment(1, 0, 0, 0),
+    ' (mocking loudly)': Sentiment(2, 0, 0, 0),
+    ' (mocking excitedly)': Sentiment(1, 0, 1, 0),
+    ' (reiterating)': Sentiment(0, 0, 0, 1),
+    ' (repeating)': Sentiment(0, 0, 0, 1),
+    ' (chanting)': Sentiment(0, 0, 1, 1),
+    ' (agreeing)': Sentiment(0, 1, 0, 0),
+    ' (cheering)': Sentiment(0, 1, 1, 0),
+    '': Sentiment(0, 0, 0, 0)
 }
 
 
