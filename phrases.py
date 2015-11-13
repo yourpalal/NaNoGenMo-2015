@@ -99,6 +99,30 @@ PRE_PUNCT_SPACE_MATCHER = re.compile(r"\s+([.,:)}'?!]+)")
 POST_PUNCT_SPACE_MATCHER = re.compile(r"([\({])\s+")
 
 
+class GeneratedSentence(object):
+    def __init__(self, detokenized, length, interrupted):
+        self.detokenized = detokenized
+        self.length = length
+        self.interrupted = interrupted
+
+    @staticmethod
+    def for_tokens(tokens):
+        interrupted = tokens[-1] == EARLY_END[0]
+        tokens = tokens[1:-1]
+        detokenized = GeneratedSentence.detokenize_sentence(tokens)
+        return GeneratedSentence(detokenized, len(tokens), interrupted)
+
+    @staticmethod
+    def detokenize_sentence(sentence):
+        result = " ".join(sentence)
+        result = result[0].upper() + result[1:]
+        result = PRE_PUNCT_SPACE_MATCHER.sub(r"\1", result)
+        return POST_PUNCT_SPACE_MATCHER.sub(r"\1", result)
+
+
+    def __str__(self):
+        return self.detokenized
+
 class Corpus(object):
     def __init__(self, gram_length=5):
         self.counts = GramNode(None)
@@ -107,13 +131,6 @@ class Corpus(object):
     @staticmethod
     def tokenize_sentence(sentence):
         return BEGIN + nltk.word_tokenize(sentence) + END
-
-    @staticmethod
-    def detokenize_sentence(sentence):
-        result = " ".join(sentence)
-        result = result[0].upper() + result[1:]
-        result = PRE_PUNCT_SPACE_MATCHER.sub(r"\1", result)
-        return POST_PUNCT_SPACE_MATCHER.sub(r"\1", result)
 
     @staticmethod
     def deduce_phrase_type(tokens):
@@ -173,7 +190,7 @@ class Corpus(object):
             token, node = self.pick_next_token(words[-context:], phrase_type)
             words.append(token)
         words = self.replace_citation_special(words)
-        return self.detokenize_sentence(words[2:-1]), words[-1] == END[0]
+        return GeneratedSentence.for_tokens(words[1:])
 
     def replace_citation_special(self, phrase):
         while CITATION[0] in phrase:
@@ -229,4 +246,4 @@ if __name__ == '__main__':
 
 
     for i in range(6):
-        print("{}: {}".format(i, corpus.generate_sentence(i % 3)[0]))
+        print("{}: {}".format(i, corpus.generate_sentence(i % 3).detokenized))

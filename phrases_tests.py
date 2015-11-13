@@ -8,7 +8,9 @@ def test_simple_phrase():
     phrase = "Hey it works!"
     corpus = phrases.Corpus()
     corpus.add_sentence(phrase, phrases.DECLARATION)
-    eq_(corpus.generate_sentence(phrases.DECLARATION), (phrase, True))
+    generated = corpus.generate_sentence(phrases.DECLARATION)
+    eq_(generated.detokenized, phrase)
+    eq_(generated.interrupted, False)
 
 
 def test_multiple_phrases():
@@ -20,7 +22,7 @@ def test_multiple_phrases():
         "it made something new",
     ])
 
-    sentences = set(corpus.generate_sentence(phrases.DECLARATION) for i in range(10))
+    sentences = set(corpus.generate_sentence(phrases.DECLARATION).detokenized for i in range(10))
     print(sentences)
 
     ok_(len(sentences) >= 2, "should make multiple sentences, made {}".format(len(sentences)))
@@ -37,7 +39,9 @@ def test_delete():
 
     corpus.counts.delete("it")
 
-    eq_(corpus.generate_sentence(phrases.DECLARATION), ("Hey", False))
+    generated = corpus.generate_sentence(phrases.DECLARATION)
+    eq_(generated.detokenized, "Hey")
+    eq_(generated.interrupted, True)
 
 def test_fix_casing():
     corpus = phrases.Corpus()

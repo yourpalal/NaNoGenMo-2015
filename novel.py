@@ -55,7 +55,7 @@ class Sentiment(object):
             current = dialog[i]
             previous = dialog[i - 1]
             last_by_actor = Sentiment.previous_phrase(dialog, i, current)
-            last_by_actor = last_by_actor or DialoguePhrase("", phrases.FACT, current.actor, False)
+            last_by_actor = last_by_actor or DialoguePhrase.make_empty(current.actor)
 
             # cannot interrupt yourself
             if previous.actor != current.actor and previous.interrupted:
@@ -139,13 +139,17 @@ Sentiment.DIRECTIONS = {
 
 
 class DialoguePhrase(object):
-    def __init__(self, phrase, phrase_type, actor, interrupted):
-        self.phrase = phrase
+    def __init__(self, phrase, phrase_type, actor):
+        self.phrase = phrase.detokenized
+        self.interrupted = phrase.interrupted
         self.phrase_type = phrase_type
         self.actor = actor
-        self.interrupted = interrupted
 
-        self.sentiment = Sentiment.for_phrase(phrase)
+        self.sentiment = Sentiment.for_phrase(self.phrase)
+
+    @staticmethod
+    def make_empty(actor):
+        return DialoguePhrase(phrases.GeneratedSentence("", 0, False), phrases.FACT, actor)
 
 class Novel(object):
     def __init__(self):
@@ -175,23 +179,23 @@ class Novel(object):
     def teacher_speak(self, phrase_type=None):
         phrase_type = phrase_type or self.randomPhraseType()
 
-        phrase, success = self.teacher.generate_sentence(phrase_type)
-        self.phrases.append(DialoguePhrase(phrase, phrase_type, "SOCRATES", not success))
+        phrase = self.teacher.generate_sentence(phrase_type)
+        self.phrases.append(DialoguePhrase(phrase, phrase_type, "SOCRATES"))
 
-        self.teach_student(phrase)
+        self.teach_student(phrase.detokenized)
 
     def student_speak(self, phrase_type=None):
         phrase_type = phrase_type or self.randomPhraseType()
 
-        phrase, success = self.student.generate_sentence(phrase_type)
-        self.phrases.append(DialoguePhrase(phrase, phrase_type, "ARISTOTLE", not success))
+        phrase = self.student.generate_sentence(phrase_type)
+        self.phrases.append(DialoguePhrase(phrase, phrase_type, "ARISTOTLE"))
 
         if phrase_type is phrases.FACT:
-            self.teach_teacher(phrase)
+            self.teach_teacher(phrase.detokenized)
 
     def student_discover(self, things=1):
         for i in range(things):
-            self.teach_student(self.teacher.generate_sentence(phrases.DECLARATION)[0])
+            self.teach_student(self.teacher.generate_sentence(phrases.DECLARATION).detokenized)
 
     def randomPhraseType(self):
         return random.choice([phrases.FACT, phrases.DECLARATION, phrases.QUESTION])
