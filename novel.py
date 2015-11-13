@@ -225,6 +225,7 @@ if __name__ == '__main__':
 
     novel.clean_corpuses()
 
+    novel.teacher_speak(phrases.QUESTION)
     for i in range(30):
         novel.teacher_speak(phrases.FACT)
         novel.teacher_speak(phrases.QUESTION)

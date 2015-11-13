@@ -45,10 +45,16 @@ def add_teacher_conversation(corpus):
     ], phrases.FACT)
 
     corpus.add_sentences([
-        "Have you considered"
+        "Have you considered whether"
+        "Have you considered the case",
     ], phrases.QUESTION)
 
 def add_common_conversation(corpus):
+    corpus.add_suffixes([
+        "the case that we must consider."
+        "the case that we must explain."
+    ], phrases.DECLARATION)
+
     corpus.add_prefixes([
         "How does",
         "Could it be said",
