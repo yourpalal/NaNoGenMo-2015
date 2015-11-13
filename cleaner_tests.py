@@ -21,3 +21,9 @@ def test_tab_splitter():
 
     s = list(cleaners.tab_splitting_fixer(["this is one sentence", "this is another    and so is this."]))
     eq_(len(s), 3)
+
+
+def test_paren_remover():
+    eq_(cleaners.remove_parens("wow neat".split()), "wow neat".split())
+    eq_(cleaners.remove_parens("wow ( neat".split()), "wow neat".split())
+    eq_(cleaners.remove_parens("wow ( ) { } neat".split()), "wow neat".split())

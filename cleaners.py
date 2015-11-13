@@ -76,15 +76,12 @@ def detect_citations(phrase, start_at=0):
     except:
         return [] # no ( or )
 
-    # too long to be a citation
-    if paren_end - paren_start > 10:
-        return detect_citations(paren_end)
-
-    try:
-        yearOrPage = int(phrase[paren_end - 1])
-        return detect_citations(phrase, paren_end) + [(paren_start, paren_end)]
-    except:
-        return detect_citations(phrase, paren_end)
+    # potentially a bit too aggressive, but it's better to catch too many things
+    # than to miss them
+    for token in phrase[paren_start:paren_end]:
+        if token.isdecimal():
+            return detect_citations(phrase, paren_end) + [(paren_start, paren_end)]
+    return detect_citations(phrase, paren_end)
 
 
 def remove_citations(tokens):
@@ -97,3 +94,8 @@ def remove_citations(tokens):
             tokens = tokens[0:citation[0]] + phrases.CITATION + tokens[citation[1] + 1:]
 
     return tokens
+
+PARENS_TO_REMOVE = {"(", ")", "{", "}"}
+
+def remove_parens(tokens):
+    return [t for t in tokens if t not in PARENS_TO_REMOVE]

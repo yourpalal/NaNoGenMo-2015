@@ -128,10 +128,12 @@ class Corpus(object):
         sentences = tab_splitting_fixer(sentences)
         sentences = abbrev_fixer(sentences)
         sentences = paren_matching_fixer(sentences)
-
         for s in sentences:
             tokens = self.tokenize_sentence(s)
-            tokens = remove_citations(tokens)
+            tokens = remove_parens(remove_citations(tokens))
+
+            if len(tokens) < 2:
+                continue
             self.add_sentence(tokens)
 
     def add_sentence(self, tokens, phrase_type=None):
@@ -176,7 +178,7 @@ class Corpus(object):
     def replace_citation_special(self, phrase):
         while CITATION[0] in phrase:
             at = phrase.index(CITATION[0])
-            phrase = phrase[0:at] + ["(", "My", "Butt", "2034", ")"] + phrase[at + 1:]
+            phrase = phrase[0:at] + ["(", "Socrates", "2015", ")"] + phrase[at + 1:]
         return phrase
 
     def word_set(self, node=None):
