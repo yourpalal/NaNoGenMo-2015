@@ -8,7 +8,7 @@ def test_simple_phrase():
     phrase = "Hey it works!"
     corpus = phrases.Corpus()
     corpus.add_sentence(phrase, phrases.DECLARATION)
-    eq_(corpus.generate_sentence(phrases.DECLARATION), phrase)
+    eq_(corpus.generate_sentence(phrases.DECLARATION), (phrase, True))
 
 
 def test_multiple_phrases():
@@ -37,7 +37,7 @@ def test_delete():
 
     corpus.counts.delete("it")
 
-    eq_(corpus.generate_sentence(phrases.DECLARATION), "Hey")
+    eq_(corpus.generate_sentence(phrases.DECLARATION), ("Hey", False))
 
 def test_fix_casing():
     corpus = phrases.Corpus()

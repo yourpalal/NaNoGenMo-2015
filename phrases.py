@@ -10,6 +10,7 @@ sentence_splitter = nltk.data.load('tokenizers/punkt/english.pickle')
 
 BEGIN = [0]
 END = [-1]
+EARLY_END = [-2]
 CITATION = [2]
 
 # basically an enum of phrase types. Some may be mutually exclusive, some may not.
@@ -61,7 +62,7 @@ class GramNode(object):
             if skip <= 0:
                 return token, self.children[token]
 
-        return random.choice(list(self.children.items()) or [(END[0], None)])
+        return random.choice(list(self.children.items()) or [(EARLY_END[0], None)])
 
     def has(self, keys):
         if len(keys) == 0:
@@ -164,13 +165,13 @@ class Corpus(object):
 
     def generate_sentence(self, phrase_type):
         words = BEGIN + BEGIN
-        while words[-1] != END[0]:
+        while words[-1] != END[0] and words[-1] != EARLY_END[0]:
             # choose number of previous tokens to consider, trending towards more as our sentence grows
             context = self.gram_length - 1 - math.floor(random.random() ** math.log(len(words)) * (self.gram_length - 1))
             token, node = self.pick_next_token(words[-context:], phrase_type)
             words.append(token)
         words = self.replace_citation_special(words)
-        return self.detokenize_sentence(words[2:-1])
+        return self.detokenize_sentence(words[2:-1]), words[-1] == END[0]
 
     def replace_citation_special(self, phrase):
         while CITATION[0] in phrase:
@@ -226,4 +227,4 @@ if __name__ == '__main__':
 
 
     for i in range(6):
-        print("{}: {}".format(i, corpus.generate_sentence(i % 3)))
+        print("{}: {}".format(i, corpus.generate_sentence(i % 3)[0]))

@@ -36,6 +36,7 @@ class Sentiment(object):
         self.confirming = confirming
         self.excitement = excitement
         self.repeating = repeating
+        self.interrupting = 0
 
     EXCITING_WORDS = ["!", "wow", "incredible", "amazing", "yes"]
 
@@ -54,7 +55,11 @@ class Sentiment(object):
             current = dialog[i]
             previous = dialog[i - 1]
             last_by_actor = Sentiment.previous_phrase(dialog, i, current)
-            last_by_actor = last_by_actor or DialoguePhrase("", phrases.FACT, current.actor)
+            last_by_actor = last_by_actor or DialoguePhrase("", phrases.FACT, current.actor, False)
+
+            # cannot interrupt yourself
+            if previous.actor != current.actor and previous.interrupted:
+                current.sentiment.interrupting = 1
 
             if Sentiment.is_repeating(dialog, i):
                 current.sentiment.repeating += 1
@@ -99,6 +104,7 @@ class Sentiment(object):
     def dist(self, other):
         return (self.excitement - other.excitement) ** 2 + \
             (self.mocking - other.mocking) ** 2 + \
+            (self.interrupting - other.interrupting) ** 2 + \
             (self.repeating - other.repeating) ** 2 + \
             (self.confirming - other.confirming) ** 2
 
@@ -114,6 +120,9 @@ class Sentiment(object):
                 direction = d
         return direction
 
+INTERRUPTING_SENTIMENT = Sentiment(0, 0, 0, 0)
+INTERRUPTING_SENTIMENT.interrupting = 1
+
 Sentiment.DIRECTIONS = {
     ' (mocking)': Sentiment(1, 0, 0, 0),
     ' (mocking loudly)': Sentiment(2, 0, 0, 0),
@@ -123,16 +132,18 @@ Sentiment.DIRECTIONS = {
     ' (chanting)': Sentiment(0, 0, 1, 1),
     ' (agreeing)': Sentiment(0, 1, 0, 0),
     ' (cheering)': Sentiment(0, 1, 1, 0),
+    ' (interrupting)': INTERRUPTING_SENTIMENT,
     '': Sentiment(0, 0, 0, 0)
 }
 
 
 
 class DialoguePhrase(object):
-    def __init__(self, phrase, phrase_type, actor):
+    def __init__(self, phrase, phrase_type, actor, interrupted):
         self.phrase = phrase
         self.phrase_type = phrase_type
         self.actor = actor
+        self.interrupted = interrupted
 
         self.sentiment = Sentiment.for_phrase(phrase)
 
@@ -164,22 +175,23 @@ class Novel(object):
     def teacher_speak(self, phrase_type=None):
         phrase_type = phrase_type or self.randomPhraseType()
 
-        phrase = self.teacher.generate_sentence(phrase_type)
-        self.phrases.append(DialoguePhrase(phrase, phrase_type, "SOCRATES"))
+        phrase, success = self.teacher.generate_sentence(phrase_type)
+        self.phrases.append(DialoguePhrase(phrase, phrase_type, "SOCRATES", not success))
+
         self.teach_student(phrase)
 
     def student_speak(self, phrase_type=None):
         phrase_type = phrase_type or self.randomPhraseType()
 
-        phrase = self.student.generate_sentence(phrase_type)
-        self.phrases.append(DialoguePhrase(phrase, phrase_type, "ARISTOTLE"))
+        phrase, success = self.student.generate_sentence(phrase_type)
+        self.phrases.append(DialoguePhrase(phrase, phrase_type, "ARISTOTLE", not success))
 
         if phrase_type is phrases.FACT:
             self.teach_teacher(phrase)
 
     def student_discover(self, things=1):
         for i in range(things):
-            self.teach_student(self.teacher.generate_sentence(phrases.DECLARATION))
+            self.teach_student(self.teacher.generate_sentence(phrases.DECLARATION)[0])
 
     def randomPhraseType(self):
         return random.choice([phrases.FACT, phrases.DECLARATION, phrases.QUESTION])
