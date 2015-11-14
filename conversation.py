@@ -14,7 +14,7 @@ def add_only_student_conversation(corpus):
         "It is understood,",
         "As I understand it,",
         "Of course,",
-        "Agreed,"
+        "Agreed,",
     ], phrases.DECLARATION)
 
     corpus.add_suffixes([
@@ -45,14 +45,14 @@ def add_teacher_conversation(corpus):
     ], phrases.FACT)
 
     corpus.add_sentences([
-        "Have you considered whether"
+        "Have you considered whether",
         "Have you considered the case",
     ], phrases.QUESTION)
 
 def add_common_conversation(corpus):
     corpus.add_suffixes([
-        "the case that we must consider."
-        "the case that we must explain."
+        "the case that we must consider.",
+        "the case that we must explain.",
     ], phrases.DECLARATION)
 
     corpus.add_prefixes([
