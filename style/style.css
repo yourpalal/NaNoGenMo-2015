@@ -1,10 +1,10 @@
 @font-face {
   font-family: "Computer Modern";
-  src: url('/style/computer_modern/cmunrm-webfont.eot');
-  src: url('/style/computer_modern/cmunrm-webfont.ttf') format(truetype),
-    url('/style/computer_modern/cmunrm-webfont.woff2') format('woff2'),
-    url('/style/computer_modern/cmunrm-webfont.woff') format('woff'),
-    url('/style/computer_modern/cmunrm-webfont.svg') format('svg');
+  src: url('./computer_modern/cmunrm-webfont.eot');
+  src: url('./computer_modern/cmunrm-webfont.ttf') format(truetype),
+    url('./computer_modern/cmunrm-webfont.woff2') format('woff2'),
+    url('./computer_modern/cmunrm-webfont.woff') format('woff'),
+    url('./computer_modern/cmunrm-webfont.svg') format('svg');
 
     font-weight: normal;
     font-style: normal;
@@ -12,11 +12,11 @@
 
 @font-face {
   font-family: "Computer Modern";
-  src: url('/style/computer_modern/cmunbx-webfont.eot');
-  src: url('/style/computer_modern/cmunbx-webfont.ttf') format(truetype),
-    url('/style/computer_modern/cmunbx-webfont.woff2') format('woff2'),
-    url('/style/computer_modern/cmunbx-webfont.woff') format('woff'),
-    url('/style/computer_modern/cmunbx-webfont.svg') format('svg');
+  src: url('./computer_modern/cmunbx-webfont.eot');
+  src: url('./computer_modern/cmunbx-webfont.ttf') format(truetype),
+    url('./computer_modern/cmunbx-webfont.woff2') format('woff2'),
+    url('./computer_modern/cmunbx-webfont.woff') format('woff'),
+    url('./computer_modern/cmunbx-webfont.svg') format('svg');
 
     font-weight: bold;
     font-style: normal;
