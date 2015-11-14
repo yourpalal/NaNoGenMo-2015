@@ -1,6 +1,13 @@
 import phrases
 
-import re
+import sys, re
+
+# these cleaners work directly with documents, filtering out low-quality docs
+def remove_empty_docs(docs):
+    for doc in docs:
+        if len(doc) < 20 or doc.isspace():
+            continue
+        yield doc
 
 # these cleaners work with phrses in string form. They fix improper sentence
 # splitting.

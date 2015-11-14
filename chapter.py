@@ -1,4 +1,4 @@
-import phrases
+import cleaners, phrases
 from conversation import *
 
 import fileinput, math, random
@@ -216,6 +216,7 @@ class ChapterGenerator(object):
     def generate_from_documents(docs):
         pickers = [UniformPicker() for i in range(6)]
 
+        docs = cleaners.remove_empty_docs(docs)
         for doc in docs:
             for p in pickers:
                 p.add(doc)
