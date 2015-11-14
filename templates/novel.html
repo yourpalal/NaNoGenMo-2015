@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Socrates and Aristotle Can't Stop Arguing</title>
+
+    <link rel="stylesheet" href="./style/style.css" >
+  </head>
+  <body>
+    <article>
+      {% for chapter in novel.chapters %}
+        {% set chapter_num = loop.index %}
+        {% include "chapter.html" %}
+      {% endfor %}
+    </article>
+  </body>
+</html>

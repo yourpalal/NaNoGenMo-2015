@@ -1,0 +1,10 @@
+<section class="chapter" id="{{chapter.id}}">
+    <h2>{{chapter_num}}. {{ chapter.title }}</h2>
+
+    {% for key, phrases in chapter.dialog | groupconsecutive('actor', 'direction') %}
+      <span class="actor">{{key[0]}}{{key[1]}}:</span>
+      <p> {% for phrase in phrases %}
+          <span class="phrase">{{ phrase.phrase }}</span>
+        {% endfor %}</p>
+    {% endfor %}
+</section>
