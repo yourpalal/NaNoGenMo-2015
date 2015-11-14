@@ -117,7 +117,9 @@ class GeneratedSentence(object):
         result = " ".join(sentence)
         result = result[0].upper() + result[1:]
         result = PRE_PUNCT_SPACE_MATCHER.sub(r"\1", result)
-        return POST_PUNCT_SPACE_MATCHER.sub(r"\1", result)
+        result = POST_PUNCT_SPACE_MATCHER.sub(r"\1", result)
+
+        return result
 
 
     def __str__(self):
@@ -145,8 +147,10 @@ class Corpus(object):
         sentences = cleaners.tab_splitting_fixer(sentences)
         sentences = cleaners.abbrev_fixer(sentences)
         sentences = cleaners.paren_matching_fixer(sentences)
+
         for s in sentences:
             tokens = self.tokenize_sentence(s)
+            tokens = cleaners.fix_bad_nt(tokens)
             tokens = cleaners.remove_parens(cleaners.remove_citations(tokens))
 
             if len(tokens) < 2:
