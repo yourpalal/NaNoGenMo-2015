@@ -57,7 +57,7 @@ def abbrev_fixer(phrases):
         yield p
 
 
-TAB_MATCHER = re.compile(r"\t|(\s\s\s\s+)")
+TAB_MATCHER = re.compile(r"\t|(\s\s\s\s\s\s+)")
 
 def tab_splitting_fixer(phrases):
     """Splits sentences on tabs"""

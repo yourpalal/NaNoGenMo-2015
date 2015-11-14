@@ -20,6 +20,9 @@ def test_tab_splitter():
     eq_(len(s), 3)
 
     s = list(cleaners.tab_splitting_fixer(["this is one sentence", "this is another    and so is this."]))
+    eq_(len(s), 2)
+
+    s = list(cleaners.tab_splitting_fixer(["this is one sentence", "this is another          and so is this."]))
     eq_(len(s), 3)
 
 

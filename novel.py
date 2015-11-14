@@ -206,19 +206,19 @@ class Novel(object):
 
 
 if __name__ == '__main__':
-    pickers = [UniformPicker() for i in range(8)]
+    pickers = [UniformPicker() for i in range(4)]
 
     for l in fileinput.input():
         for p in pickers:
             p.add(l[:])
 
     novel = Novel()
-    for p in pickers[:3]:
+    for p in pickers[:-3]:
         # teach twice for higher probability of using this text
         novel.teach_teacher(p.chosen)
         novel.teach_teacher(p.chosen)
 
-    for p in pickers[3:]:
+    for p in pickers[-3:]:
         # teach twice for higher probability of using this text
         novel.teach_student(p.chosen)
         novel.teach_student(p.chosen)
@@ -226,7 +226,7 @@ if __name__ == '__main__':
     novel.clean_corpuses()
 
     novel.teacher_speak(phrases.QUESTION)
-    for i in range(30):
+    for i in range(15):
         novel.teacher_speak(phrases.FACT)
         novel.teacher_speak(phrases.QUESTION)
 
