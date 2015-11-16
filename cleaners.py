@@ -83,6 +83,14 @@ BAD_TOKENS = {
 def swap_bad_tokens(phrase):
     return [BAD_TOKENS.get(p, p) for p in phrase]
 
+NUM_MATCHER = re.compile(r"[\d.]+")
+
+def remove_leading_numbers(phrase):
+    # assume phrase[0] is BEGIN
+    if NUM_MATCHER.match(phrase[1]):
+        del phrase[1]
+    return phrase
+
 
 def detect_citations(phrase, start_at=0):
     try:

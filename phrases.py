@@ -151,6 +151,7 @@ class Corpus(object):
         for s in sentences:
             tokens = self.tokenize_sentence(s)
             tokens = cleaners.swap_bad_tokens(tokens)
+            tokens = cleaners.remove_leading_numbers(tokens)
             tokens = cleaners.remove_parens(cleaners.remove_citations(tokens))
 
             if len(tokens) < 2:

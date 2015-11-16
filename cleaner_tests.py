@@ -34,3 +34,6 @@ def test_paren_remover():
     eq_(cleaners.remove_parens("wow neat".split()), "wow neat".split())
     eq_(cleaners.remove_parens("wow ( neat".split()), "wow neat".split())
     eq_(cleaners.remove_parens("wow ( ) { } neat".split()), "wow neat".split())
+
+def test_number_remover():
+    eq_(cleaners.remove_leading_numbers(tokenize("4.2 wow no numbers")), [0, "wow", "no", "numbers", -1])
