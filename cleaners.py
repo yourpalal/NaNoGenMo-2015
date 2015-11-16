@@ -76,15 +76,13 @@ def tab_splitting_fixer(phrases):
 
 # these cleaners work on tokenized phrases, altering them in some way
 
-def fix_bad_nt(phrase):
-    """Searches for improper tokenization of <prefix>n't (eg. "do", "n't") and fixes it"""
-    completed = 0
-    while completed < len(phrase) and "n't" in phrase:
-        location = phrase.index("n't", completed)
-        phrase[location - 1] += "n't"
-        del phrase[location]
-        completed = location + 1
-    return phrase
+BAD_TOKENS = {
+    "n't": "not"
+}
+
+def swap_bad_tokens(phrase):
+    return [BAD_TOKENS.get(p, p) for p in phrase]
+
 
 def detect_citations(phrase, start_at=0):
     try:

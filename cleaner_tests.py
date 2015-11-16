@@ -11,22 +11,8 @@ def test_detetct_citations():
 
 
 def test_dont_fixer():
-    eq_(cleaners.fix_bad_nt(["do", "n't"]), ["don't"])
-    eq_(cleaners.fix_bad_nt(["have", "n't"]), ["haven't"])
-    eq_(cleaners.fix_bad_nt(["is", "n't"]), ["isn't"])
-    eq_(cleaners.fix_bad_nt(["would", "n't"]), ["wouldn't"])
-    eq_(cleaners.fix_bad_nt(["should", "n't"]), ["shouldn't"])
-    eq_(cleaners.fix_bad_nt(["wo", "n't"]), ["won't"])
-    eq_(cleaners.fix_bad_nt(["does", "n't"]), ["doesn't"])
-    eq_(cleaners.fix_bad_nt(["could", "n't"]), ["couldn't"])
-    eq_(cleaners.fix_bad_nt(["are", "n't"]), ["aren't"])
-    eq_(cleaners.fix_bad_nt(["need", "n't"]), ["needn't"])
-    eq_(cleaners.fix_bad_nt(["were", "n't"]), ["weren't"])
-    eq_(cleaners.fix_bad_nt(["did", "n't"]), ["didn't"])
-    eq_(cleaners.fix_bad_nt(["had", "n't"]), ["hadn't"])
-    eq_(cleaners.fix_bad_nt(["was", "n't"]), ["wasn't"])
-    eq_(cleaners.fix_bad_nt(["ai", "n't"]), ["ain't"])
-    eq_(cleaners.fix_bad_nt(["ca", "n't"]), ["can't"])
+    eq_(cleaners.swap_bad_tokens(["do", "n't"]), ["do", "not"])
+    eq_(cleaners.swap_bad_tokens(tokenize("don't")), [0, "do", "not", -1])
 
 def test_citation_replacer():
     eq_(cleaners.remove_citations(tokenize("wow (Bob 1995)")), [0, "wow", 2, -1])
