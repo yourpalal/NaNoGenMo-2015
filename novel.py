@@ -12,8 +12,9 @@ templates.filters['groupconsecutive'] = groupconsecutive
 novel_template = templates.get_template('novel.html')
 
 class Novel(object):
-    def __init__(self, chapters):
+    def __init__(self, chapters, title="Socrates and Aristotle are Fighting Again"):
         self.chapters = chapters
+        self.title = title
 
     @staticmethod
     def create_from_corpus_file(filename, min_words=500):

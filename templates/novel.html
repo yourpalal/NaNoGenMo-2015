@@ -4,12 +4,21 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Socrates and Aristotle Can't Stop Arguing</title>
+    <title>{{novel.title}}</title>
 
     <link rel="stylesheet" href="./style/style.css" >
   </head>
   <body>
     <article>
+      <header>
+        <h1>{{novel.title}}</h1>
+        <nav class="toc">
+          <ul>{% for chapter in novel.chapters %}
+            {% set chapter_num = loop.index %}
+            <li><a href="#chapter-{{chapter_num}}">{{chapter_num}}. {{ chapter.title }}</a></li>
+          {% endfor %}</ul>
+        </nav>
+      </header>
       {% for chapter in novel.chapters %}
         {% set chapter_num = loop.index %}
         {% include "chapter.html" %}

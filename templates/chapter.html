@@ -1,4 +1,4 @@
-<section class="chapter" id="{{chapter.id}}">
+<section class="chapter" id="chapter-{{chapter_num}}">
     <h2>{{chapter_num}}. {{ chapter.title }}</h2>
 
     {% for key, phrases in chapter.dialog | groupconsecutive('actor', 'direction') %}
