@@ -4,6 +4,10 @@ This is my entry for [NaNoGenMo 2015](https://github.com/dariusk/NaNoGenMo-2015)
 
 Using a corpus of philosophical text and a simple ngram/markov chain model, this program generates text that is intended to be recognizable as [Socratic dialogues](https://en.wikipedia.org/wiki/Socratic_dialogue). Within the corpus I use, each line is considered to be a separate document. This corpus is not included in the repo in an attempt to be respectful of the authors' copyrights.
 
+Overall, I'm somewhat happy with the output of this generator. It has the potential
+to make some very funny passages, but it often produces conversation that doesn't make
+much sense.
+
 Beyond the basic Markov chain that has been done many times before, I added in a few interesting techniques, listed below.
 
 ## Actors
