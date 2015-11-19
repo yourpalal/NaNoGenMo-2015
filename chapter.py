@@ -214,7 +214,7 @@ class ChapterGenerator(object):
 
     @staticmethod
     def generate_from_documents(docs):
-        pickers = [UniformPicker() for i in range(6)]
+        pickers = [UniformPicker() for i in range(10)]
 
         docs = cleaners.remove_empty_docs(docs)
         for doc in docs:
@@ -228,7 +228,7 @@ class ChapterGenerator(object):
             gen.teach_teacher(p.chosen)
             gen.teach_teacher(p.chosen)
 
-        for p in pickers[-4:]:
+        for p in pickers[3:]:
             # teach twice for higher probability of using this text
             gen.teach_student(p.chosen)
             gen.teach_student(p.chosen)
