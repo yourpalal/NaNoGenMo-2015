@@ -181,7 +181,7 @@ class ChapterGenerator(object):
     def teacher_speak(self, phrase_type=None):
         phrase_type = phrase_type or self.randomPhraseType()
 
-        phrase = self.teacher.generate_sentence(phrase_type)
+        phrase = self.teacher.generate_sentence(phrase_type, "Socrates")
         self.word_count += phrase.length
         self.phrases.append(DialoguePhrase(phrase, phrase_type, "SOCRATES"))
 
@@ -190,7 +190,7 @@ class ChapterGenerator(object):
     def student_speak(self, phrase_type=None):
         phrase_type = phrase_type or self.randomPhraseType()
 
-        phrase = self.student.generate_sentence(phrase_type)
+        phrase = self.student.generate_sentence(phrase_type, "Aristotle")
         self.word_count += phrase.length
         self.phrases.append(DialoguePhrase(phrase, phrase_type, "ARISTOTLE"))
 

@@ -182,20 +182,21 @@ class Corpus(object):
     def pick_next_token(self, previous, phrase_type):
         return self.counts.pick_best(previous, phrase_type)
 
-    def generate_sentence(self, phrase_type):
+    def generate_sentence(self, phrase_type, citation_name="Socrates"):
         words = BEGIN + BEGIN
         while words[-1] != END[0] and words[-1] != EARLY_END[0]:
             # choose number of previous tokens to consider, trending towards more as our sentence grows
             context = self.gram_length - 1 - math.floor(random.random() ** math.log(len(words)) * (self.gram_length - 1))
             token, node = self.pick_next_token(words[-context:], phrase_type)
             words.append(token)
-        words = self.replace_citation_special(words)
+        words = self.replace_citation_special(words, citation_name)
         return GeneratedSentence.for_tokens(words[1:])
 
-    def replace_citation_special(self, phrase):
+    def replace_citation_special(self, phrase, name):
+        year = random.randrange(1600, 2016)
         while CITATION[0] in phrase:
             at = phrase.index(CITATION[0])
-            phrase = phrase[0:at] + ["(", "Socrates", "2015", ")"] + phrase[at + 1:]
+            phrase = phrase[0:at] + ["(", name, str(year), ")"] + phrase[at + 1:]
         return phrase
 
     def word_set(self, node=None):
