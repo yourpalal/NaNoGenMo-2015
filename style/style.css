@@ -28,7 +28,12 @@ html, body {
 
   background-color: lightgoldenrodyellow;
 
-  font-family: "Computer Modern", cursive;
+  font-family: "Computer Modern", serif;
+}
+
+nav ul {
+  list-style: none;
+  padding-left: 0;
 }
 
 .actor {
