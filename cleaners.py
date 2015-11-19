@@ -1,6 +1,18 @@
-import phrases
-
 import sys, re
+
+class Cleaner(object):
+    def clean_sentences(self, sentences):
+        sentences = tab_splitting_fixer(sentences)
+        sentences = abbrev_fixer(sentences)
+        return paren_matching_fixer(sentences)
+
+    def clean_phrase(self, tokens):
+        tokens = swap_bad_tokens(tokens)
+        tokens = remove_leading_numbers(tokens)
+        tokens = remove_citations(tokens)
+        tokens = remove_parens(tokens)
+        return tokens
+
 
 # these cleaners work directly with documents, filtering out low-quality docs
 def remove_empty_docs(docs):
@@ -110,6 +122,7 @@ def detect_citations(phrase, start_at=0):
 def remove_citations(tokens):
     """Attempts to replace citations like (Ralph 2015) with the CITATION special
     token, to be replaced with another citation later."""
+    import phrases
 
     if "(" in tokens and ")" in tokens:
         citations = detect_citations(tokens)

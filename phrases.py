@@ -3,7 +3,7 @@
 from collections import defaultdict
 import fileinput, itertools, math, nltk, random, re
 
-import cleaners
+from cleaners import Cleaner
 from conversation import *
 
 sentence_splitter = nltk.data.load('tokenizers/punkt/english.pickle')
@@ -129,6 +129,7 @@ class Corpus(object):
     def __init__(self, gram_length=5):
         self.counts = GramNode(None)
         self.gram_length = gram_length
+        self.cleaner = Cleaner()
 
     @staticmethod
     def tokenize_sentence(sentence):
@@ -143,16 +144,10 @@ class Corpus(object):
         return DECLARATION
 
     def add_document(self, doc):
-        sentences = sentence_splitter.tokenize(doc)
-        sentences = cleaners.tab_splitting_fixer(sentences)
-        sentences = cleaners.abbrev_fixer(sentences)
-        sentences = cleaners.paren_matching_fixer(sentences)
+        sentences = self.cleaner.clean_sentences(sentence_splitter.tokenize(doc))
 
         for s in sentences:
-            tokens = self.tokenize_sentence(s)
-            tokens = cleaners.swap_bad_tokens(tokens)
-            tokens = cleaners.remove_leading_numbers(tokens)
-            tokens = cleaners.remove_parens(cleaners.remove_citations(tokens))
+            tokens = self.cleaner.clean_phrase(self.tokenize_sentence(s))
 
             if len(tokens) < 2:
                 continue
