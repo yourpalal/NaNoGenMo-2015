@@ -47,7 +47,15 @@ article {
 }
 
 p {
+    margin-left: 5em;
+    clear: both;
+}
+
+@media (min-width: 600px) {
+  p {
+    clear: none;
     margin-left: 20em;
+  }
 }
 
 p .phrase {
